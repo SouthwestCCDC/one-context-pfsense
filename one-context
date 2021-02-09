@@ -1,0 +1,138 @@
+#!/usr/local/bin/php-cgi -f
+<?php
+
+# one-context-pfsense
+#
+# @author George Louthan <duplico@dupli.co>
+#
+# Based partly on work by MATPOCKuH <https://github.com/MATPOCKuH>.
+# (see https://github.com/OpenNebula/addon-context-linux/issues/144)
+#
+# This script is designed to contextualize a pfSense instance in
+# OpenNebula (as a VM Instance, not a Virtual Router). It will set
+# the interface IP configurations, WAN DNS, and SSH public key for
+# the admin user.
+#
+# This script is designed to run at boot, every time the system
+#  starts. It should be placed at /usr/local/sbin/one-context.
+# Any time this script is run, it ensures that it is set to run at
+#  system startup. So, when creating a template it is desireable to
+#  manually run this script once; it will then run automatically on
+#  subsequent boots, including upon provisioning of a new instance.
+#
+# It assumes that the first interface (em0/ETH0) is the WAN, and the
+#  second (em1/ETH1) is the LAN, and that the subsequent interfaces
+#  are OPT1, OPT2, etc., in order.
+#
+# Furthermore, it assumes that the host is presenting the pfSense
+#  instance with virtualized e1000 interfaces, rather than, e.g.,
+#  virtio paravirtualized NICs, that would result in FreeBSD giving
+#  them names other than em0, em1, etc.
+#
+# To the extent of my authorship of this script, this is released
+# under the MIT license.
+#
+
+# OpenNebula gives its instances access to a virtual CD, which
+#  at its root contains a file called `context.sh`, full of
+#  key-value pairs that we need to adopt as our context.
+
+system("mount -t cd9660 /dev/cd0 /mnt");
+$context = parse_ini_file("/mnt/context.sh");
+system("umount /mnt");
+
+require_once("globals.inc");
+require_once("functions.inc");
+require_once("config.inc");
+require_once("util.inc");
+
+# Helper function to convert a subnet mask to a prefixlen.
+function mask2cidr($mask) {
+  $mask = ip2long($mask);
+  for ($cidr = 32, $shift = 1; ($mask & $shift) == 0;
+    $cidr--, $shift <<= 1);
+
+  return $cidr;
+}
+
+# Helper function that looks up a config option in the pfSense
+# config.xml, and upon detecting a mismatch from the required value,
+# set a flag that will reboot the system (to apply the config) at
+# end of the script.
+function check_and_apply_if_different(&$config, $value) {
+  global $apply_required;
+
+  if (!isset($config) || strcmp($config, $value) != 0) {
+    $config = $value;
+    echo $config;
+    $apply_required = true;
+  }
+}
+
+# Helper function that looks up a config option in the pfSense
+# config.xml, and if it is not set, applies a default value, then
+# set a flag that will reboot the system (to apply the config) at
+# end of the script.
+function check_and_apply_if_unset(&$config, $value) {
+  if (!isset($config))
+    check_and_apply_if_different($config, $value);
+}
+
+# Do we need to reboot at the end of our run?
+$apply_required = false;
+
+# TODO: See if there are more interfaces, and automatically configure OPTn for them.
+
+# TODO: Create an array of WAN => ETH0, LAN => ETH1, OPT1 => ETH2, ...
+#       up to the number of interfaces that we have.
+
+# We map em0/ETH0 to WAN and em1/ETH1 to LAN
+# Create a $zones array mapping "WAN" and "LAN" to "ETH0" and "ETH1"
+$zones = array(
+  "WAN" => "ETH0",
+  "LAN" => "ETH1");
+
+check_and_apply_if_different(
+  $config["system"]["earlyshellcmd"],
+  "/usr/local/sbin/one-context");
+check_and_apply_if_different(
+  $config["system"]["dnsserver"]["0"],
+  $context[$zones["WAN"] . "_DNS"]);
+check_and_apply_if_different(
+  $config["gateways"]["gateway_item"][0]["gateway"],
+  $context[$zones["WAN"] . "_GATEWAY"]);
+
+foreach (array("wan" => "WAN", "lan" => "LAN") as
+  $iface => $zone) {
+  $ifnum = str_replace("ETH", "", $zones[$zone]);
+  #check_and_apply_if_different($config["interfaces"][$iface]["enable"], "");
+  check_and_apply_if_different($config["interfaces"][$iface]["if"], "em" . $ifnum);
+  check_and_apply_if_different($config["interfaces"][$iface]["ipaddr"],
+    $context[$zones[$zone] . "_IP"]);
+  check_and_apply_if_different($config["interfaces"][$iface]["subnet"],
+    mask2cidr($context[$zones[$zone] . "_MASK"]));
+}
+
+if (!isset($config["system"]["ssh"]["enable"])) {
+    $apply_required = true;
+    echo "SSH not enabled.\n";
+    $config["system"]["ssh"] = array(
+        "enable" => "enabled",
+        "sshdkeyonly" => "enabled"
+    );
+}
+
+if ($config["system"]["user"][0]["name"] == "admin") {
+    if ($config["system"]["user"][0]["authorizedkeys"] == "") {
+        $apply_required = true;
+        echo "SSH needs keys.\n";
+        check_and_apply_if_different($config["system"]["user"][0]["authorizedkeys"], base64_encode($context["SSH_PUBLIC_KEY"]));
+    }
+}
+
+if ($apply_required) {
+  write_config();
+  echo "Reboot required.\n";
+  system_reboot_sync();
+}
+?>
