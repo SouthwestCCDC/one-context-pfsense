@@ -88,16 +88,32 @@ $apply_required = false;
 
 # We map em0/ETH0 to WAN and em1/ETH1 to LAN
 # Create a $zones array mapping "WAN" and "LAN" to "ETH0" and "ETH1"
+
+# We need to determine what and how many interfaces we have.
+
+$interface_id = 0;
+
+while (array_key_exists("ETH" . $interface_id . "_IP", $context)) {
+
+  $interface_id += 1;
+}
+
 $zones = array(
   "WAN" => "ETH0",
   "LAN" => "ETH1");
 
+# This script should be in the "earlyshellcmd" config, so it runs at
+#  boot.
 check_and_apply_if_different(
   $config["system"]["earlyshellcmd"],
   "/usr/local/sbin/one-context");
+
+# The WAN's DNS server should be this instance's primary DNS server.
 check_and_apply_if_different(
   $config["system"]["dnsserver"]["0"],
   $context[$zones["WAN"] . "_DNS"]);
+
+# The WAN's default gateway should be this instance's first gateway.
 check_and_apply_if_different(
   $config["gateways"]["gateway_item"][0]["gateway"],
   $context[$zones["WAN"] . "_GATEWAY"]);
