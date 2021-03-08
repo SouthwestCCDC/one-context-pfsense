@@ -143,10 +143,16 @@ if (!isset($config["system"]["ssh"]["enable"])) {
 
 if ($config["system"]["user"][0]["name"] == "admin") {
     $current_keys = base64_decode($config["system"]["user"][0]["authorizedkeys"]);
-    if (strpos($current_keys, $context["SSH_PUBLIC_KEY"]) == false) {
+    if (strpos($current_keys, $context["SSH_PUBLIC_KEY"]) === false) {
       # The contextualization key or keys are missing from the file.
       $apply_required = true;
       echo "SSH needs keys.\n";
+      echo "Current:\n";
+      echo $current_keys;
+      echo "\n\n\nNeeded:\n";
+      echo $context["SSH_PUBLIC_KEY"];
+      echo "\n\n";
+      echo strpos($current_keys, $context["SSH_PUBLIC_KEY"]);
       if (!$dry_run)
         $config["system"]["user"][0]["authorizedkeys"] = base64_encode($context["SSH_PUBLIC_KEY"]);
     }
