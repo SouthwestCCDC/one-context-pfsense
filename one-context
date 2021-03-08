@@ -39,7 +39,7 @@
 
 $dry_run = false;
 
-if ($argc >= 2 && $argv[1] == "--dry-run")
+if ($argc >= 2 && $argv[1] == "dry-run")
   $dry_run = true;
 
 system("mount -t cd9660 /dev/cd0 /mnt");
