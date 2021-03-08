@@ -37,6 +37,11 @@
 #  at its root contains a file called `context.sh`, full of
 #  key-value pairs that we need to adopt as our context.
 
+$dry_run = false;
+
+if ($argc >= 2 && $argv[1] == "--dry-run")
+  $dry_run = true;
+
 system("mount -t cd9660 /dev/cd0 /mnt");
 $context = parse_ini_file("/mnt/context.sh");
 system("umount /mnt");
@@ -61,10 +66,13 @@ function mask2cidr($mask) {
 # end of the script.
 function check_and_apply_if_different(&$config, $value) {
   global $apply_required;
+  global $dry_run;
 
   if (!isset($config) || strcmp($config, $value) != 0) {
-    $config = $value;
+    if (!$dry_run)
+      $config = $value;
     echo $config;
+    echo "\n";
     $apply_required = true;
   }
 }
@@ -139,11 +147,12 @@ if ($config["system"]["user"][0]["name"] == "admin") {
       # The contextualization key or keys are missing from the file.
       $apply_required = true;
       echo "SSH needs keys.\n";
-      $config["system"]["user"][0]["authorizedkeys"] = base64_encode($context["SSH_PUBLIC_KEY"]);
+      if (!$dry_run)
+        $config["system"]["user"][0]["authorizedkeys"] = base64_encode($context["SSH_PUBLIC_KEY"]);
     }
 }
 
-if ($apply_required) {
+if ($apply_required && !$dry_run) {
   write_config();
   echo "Reboot required.\n";
   system_reboot_sync();
