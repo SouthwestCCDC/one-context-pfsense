@@ -5,6 +5,7 @@
      "builders": [
           {
                "type": "virtualbox-iso",
+               "headless": true,
                "boot_wait": "7s",
                "boot_command": [
                "<wait>1",
@@ -30,7 +31,7 @@
                "vm_name": "swccdc_pfsense_packer",
                "guest_os_type": "FreeBSD_64",
                "iso_url": "{{ user `iso` }}",
-               "iso_checksum": "",
+               "iso_checksum": "none",
                "shutdown_command": "8<enter>reboot<enter>",
                "vboxmanage": [
                  ["modifyvm", "{{.Name}}", "--memory", "2048"],
