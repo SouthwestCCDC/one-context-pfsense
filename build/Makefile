@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 .PHONY = help
-.DEFAULT_GOAL = help
+.DEFAULT_GOAL = pfsense.iso
 
 ifdef ROLE
 ANSIBLE_DIR=${ANSIBLE_BASE}/roles/${ROLE}

@@ -31,7 +31,6 @@
                "guest_os_type": "FreeBSD_64",
                "iso_url": "{{ user `iso` }}",
                "iso_checksum": "",
-               "iso_checksum_type": "skip",
                "shutdown_command": "8<enter>reboot<enter>",
                "vboxmanage": [
                  ["modifyvm", "{{.Name}}", "--memory", "2048"],
