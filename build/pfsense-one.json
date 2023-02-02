@@ -41,7 +41,10 @@
                  ["modifyvm", "{{.Name}}", "--mouse", "usbtablet"],
                  ["modifyvm", "{{.Name}}", "--graphicscontroller", "vmsvga"],
                  ["modifyvm", "{{.Name}}", "--vram", "16"]
-               ]
+               ],
+               
+               "ssh_username": "root",
+               "ssh_password": "swccdc"
           }
      ],
      "provisioners": [
