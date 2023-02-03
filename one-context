@@ -43,7 +43,7 @@ if ($argc >= 2 && $argv[1] == "dry-run")
   $dry_run = true;
 
 # Now apparently the emulated CD drives are taking forever to mount?
-system("while [ ! -e /dev/cd0 /mnt ]; do sleep 1; done");
+system("while [ ! -e /dev/cd0 ]; do sleep 1; done");
 system("mount -t cd9660 /dev/cd0 /mnt");
 if (!file_exists("/mnt/context.sh")) {
   exit();
