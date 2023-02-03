@@ -1,0 +1,49 @@
+{
+     "variables": {
+       "iso": "pfsense.iso",
+       "pfsense_version": "2.5.2"
+     },
+     "builders": [
+          {
+               "http_directory": "http",
+               "http_port_min": "8100",
+               "type": "qemu",
+               "headless": "false",
+               "boot_wait": "5s",
+               "boot_steps": [
+                    ["1<enter><wait45s>", "Boot into installer media..."],
+                    ["<enter><wait3s>", "Accept installer terms."],
+                    ["io<enter><wait5s>", "Select Install."],
+                    ["<enter><wait>", "Set keyboard map."],
+                    ["<down><enter>", "UFS with UEFI."],
+                    ["<wait110s>", "Wait for installer to copy files..."],
+                    ["n<wait>", "Don't drop into a root shell."],
+                    ["r<wait60s>", "Rebooting..."],
+                    ["n<enter><wait>", "No VLANs please."],
+                    ["em0<enter><wait>", "Configure em0 as WAN."],
+                    ["<enter><wait>", "Skipping LAN."],
+                    ["y<enter><wait>", "Write config."],
+                    ["<wait75s>", "Wait for config to load..."],
+                    ["8<enter><wait3s>", "Drop to a shell."],
+                    ["telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' > /usr/local/sbin/one-context<wait><enter>", "HTTP connection for one-context"],
+                    ["GET /one-context HTTP/1.0<enter><enter>", "HTTP GET one-context"],
+                    ["<wait>chmod 755 /usr/local/sbin/one-context<enter>", "chmod +x one-context"],
+                    ["telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' > one-context-install<wait><enter>", "HTTP connection for one-context-install"],
+                    ["GET /one-context-install HTTP/1.0<enter><enter>", "HTTP GET one-context-install"],
+                    ["chmod 755 one-context-install<enter>", "chmod +x one-context-install"],
+                    ["./one-context-install<enter><wait5s>", "Run one-context-install..."],
+                    ["shutdown -p now<enter>", "Shutting down..."]
+               ],
+               "vm_name": "pfsense_{{ user `pfsense_version` }}.qcow2",
+               "iso_url": "{{ user `iso` }}",
+               "iso_checksum": "none",
+               "communicator": "none",
+               "format": "qcow2",
+               "net_device": "e1000",
+               "disk_size": "4096M",
+               "memory": 2048
+          }
+     ],
+     "provisioners": [
+     ]
+}

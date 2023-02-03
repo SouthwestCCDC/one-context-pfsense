@@ -1,0 +1,39 @@
+#!/usr/local/bin/php-cgi -f
+<?php
+
+# one-context-install
+#
+
+$dry_run = false;
+if ($argc >= 2 && $argv[1] == "dry-run")
+  $dry_run = true;
+
+require_once("globals.inc");
+require_once("functions.inc");
+require_once("config.inc");
+require_once("util.inc");
+
+# Helper function that looks up a config option in the pfSense
+# config.xml, and upon detecting a mismatch from the required value,
+# set a flag that will reboot the system (to apply the config) at
+# end of the script.
+function check_and_apply_if_different(&$config, $value) {
+  global $apply_required;
+  global $dry_run;
+
+  if (!isset($config) || strcmp($config, $value) != 0) {
+    if (!$dry_run)
+      $config = $value;
+    echo $config;
+    echo "\n";
+    $apply_required = true;
+  }
+}
+
+# This script should be in the "earlyshellcmd" config, so it runs at
+#  boot.
+check_and_apply_if_different(
+  $config["system"]["earlyshellcmd"],
+  "/usr/local/sbin/one-context");
+write_config();
+?>
