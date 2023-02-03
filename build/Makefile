@@ -1,11 +1,11 @@
 SHELL:=/bin/bash
 .PHONY = help
-.DEFAULT_GOAL = pfsense.iso
+.DEFAULT_GOAL = pfsense.qcow2
 
-MIRROR="atxfiles.netgate.com"
-VERSION="2.5.0"
-PFSENSE_ISO="pfSense-CE-${VERSION}-RELEASE-amd64.iso"
-PFSENSE_URL="https://${MIRROR}/mirror/downloads/${PFSENSE_ISO}.gz"
+MIRROR=atxfiles.netgate.com
+VERSION=2.5.2
+PFSENSE_ISO=pfSense-CE-${VERSION}-RELEASE-amd64.iso
+PFSENSE_URL=https://${MIRROR}/mirror/downloads/${PFSENSE_ISO}.gz
 
 pfsense.iso.gz:
 	wget ${PFSENSE_URL}
@@ -22,9 +22,11 @@ http:
 	cp ../one-context* http/
 
 pfsense.qcow2: pfsense.iso http
+	packer build pfsense-one.json
+	cp output-qemu/pfsense_${VERSION}.qcow2 pfsense.qcow2
 
 clean:
-	@-rm -rf packer_cache http pfsense.iso* output-qemu ${PFSENSE_ISO}* 2>/dev/null || true
+	@-rm -rf packer_cache http pfsense.iso* output-qemu pfsense.qcow2 ${PFSENSE_ISO}* 2>/dev/null || true
 
 help:
 	@echo "---  Prepare a pfSense image for SWCCDC OpenNebula  ---"
