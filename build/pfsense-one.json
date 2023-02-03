@@ -39,8 +39,9 @@
                "iso_checksum": "none",
                "communicator": "none",
                "format": "qcow2",
-               "net_device": "e1000"
-
+               "net_device": "e1000",
+               "disk_size": "4096M",
+               "memory": 2048
           }
      ],
      "provisioners": [
