@@ -16,23 +16,25 @@
                     ["io<enter><wait5s>", "Select Install."],
                     ["<enter><wait>", "Set keyboard map."],
                     ["<down><enter>", "UFS with UEFI."],
-                    ["<wait110s>", "Wait for installer to copy files..."],
+                    ["<wait100s>", "Wait for installer to copy files..."],
                     ["n<wait>", "Don't drop into a root shell."],
                     ["r<wait60s>", "Rebooting..."],
                     ["n<enter><wait>", "No VLANs please."],
-                    ["em0<enter><wait>", "Configure em0 as WAN."],
+                    ["em0<enter><wait>", "WAN is em0."],
                     ["<enter><wait>", "Skipping LAN."],
                     ["y<enter><wait>", "Write config."],
                     ["<wait75s>", "Wait for config to load..."],
-                    ["8<enter><wait3s>", "Drop to a shell."],
-                    ["telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' > /usr/local/sbin/one-context<wait><enter>", "HTTP connection for one-context"],
-                    ["GET /one-context HTTP/1.0<enter><enter>", "HTTP GET one-context"],
-                    ["<wait>chmod 755 /usr/local/sbin/one-context<enter>", "chmod +x one-context"],
-                    ["telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' > one-context-install<wait><enter>", "HTTP connection for one-context-install"],
-                    ["GET /one-context-install HTTP/1.0<enter><enter>", "HTTP GET one-context-install"],
-                    ["chmod 755 one-context-install<enter>", "chmod +x one-context-install"],
-                    ["./one-context-install<enter><wait5s>", "Run one-context-install..."],
-                    ["shutdown -p now<enter>", "Shutting down..."]
+                    ["2<enter><wait>", "Go to reconfigure interfaces..."],
+                    ["n<enter><wait>10.73.0.101<enter>24<enter>10.73.0.1<enter>n<enter><enter>n<enter>n<enter><enter><wait>", "WAN/em0"],
+                    ["8<enter>", "Go to shell"],
+                    ["mount -t cd9660 /dev/cd1 /mnt<enter><wait2s>", "Mount the virtual CD"],
+                    ["cp /mnt/one-context /usr/local/sbin/one-context<enter><wait>", "Copy one-context"],
+                    ["chmod 755 /usr/local/sbin/one-context<enter><wait>", "chmod +x one-context"],
+                    ["cp /mnt/one-context-install .<enter><wait>", "Copy one-context-install"],
+                    ["chmod 755 one-context-install<enter><wait>", "chmod +x one-context-install"],
+                    ["./one-context-install<enter><wait4s>", "Run one-context-install"],
+                    ["shutdown -p now<enter>", "Shut down."]
+
                ],
                "vm_name": "pfsense_{{ user `pfsense_version` }}.qcow2",
                "iso_url": "{{ user `iso` }}",
@@ -41,7 +43,11 @@
                "format": "qcow2",
                "net_device": "e1000",
                "disk_size": "4096M",
-               "memory": 2048
+               "memory": 2048,
+               "cd_files": [
+                    "../one-context",
+                    "../one-context-install"
+               ]
           }
      ],
      "provisioners": [
