@@ -35,5 +35,12 @@ function check_and_apply_if_different(&$config, $value) {
 check_and_apply_if_different(
   $config["system"]["earlyshellcmd"],
   "/usr/local/sbin/one-context");
+
+# Disable the firewall out of the box, so we can connect to it from
+#  any interface and apply our configuration.
+check_and_apply_if_different(
+  $config["system"]["disablefilter"],
+  "enabled");
+
 write_config();
 ?>
