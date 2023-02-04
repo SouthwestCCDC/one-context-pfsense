@@ -36,6 +36,7 @@
                     ["shutdown -p now<enter>", "Shut down."]
 
                ],
+               -nic user,model=e1000
                "vm_name": "pfsense_{{ user `pfsense_version` }}.qcow2",
                "iso_url": "{{ user `iso` }}",
                "iso_checksum": "none",
