@@ -18,7 +18,7 @@
                     ["<down><enter>", "UFS with UEFI."],
                     ["<wait100s>", "Wait for installer to copy files..."],
                     ["n<wait>", "Don't drop into a root shell."],
-                    ["r<wait60s>", "Rebooting..."],
+                    ["r<wait120s>", "Rebooting..."],
                     ["n<enter><wait>", "No VLANs please."],
                     ["em0<enter><wait>", "WAN is em0."],
                     ["em1<enter><wait>", "LAN is em1."],
