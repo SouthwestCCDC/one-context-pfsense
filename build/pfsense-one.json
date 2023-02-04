@@ -21,11 +21,9 @@
                     ["r<wait60s>", "Rebooting..."],
                     ["n<enter><wait>", "No VLANs please."],
                     ["em0<enter><wait>", "WAN is em0."],
-                    ["<enter><wait>", "Skipping LAN."],
+                    ["em1<enter><wait>", "LAN is em1."],
                     ["y<enter><wait>", "Write config."],
                     ["<wait75s>", "Wait for config to load..."],
-                    ["2<enter><wait>", "Go to reconfigure interfaces..."],
-                    ["n<enter><wait>10.73.0.101<enter>24<enter>10.73.0.1<enter>n<enter><enter>n<enter>n<enter><enter><wait>", "WAN/em0"],
                     ["8<enter>", "Go to shell"],
                     ["mount -t cd9660 /dev/cd1 /mnt<enter><wait2s>", "Mount the virtual CD"],
                     ["cp /mnt/one-context /usr/local/sbin/one-context<enter><wait>", "Copy one-context"],
@@ -36,7 +34,9 @@
                     ["shutdown -p now<enter>", "Shut down."]
 
                ],
-               -nic user,model=e1000
+               "qemuargs": [
+                    ["-nic", "user,model=e1000"]
+               ],
                "vm_name": "pfsense_{{ user `pfsense_version` }}.qcow2",
                "iso_url": "{{ user `iso` }}",
                "iso_checksum": "none",
