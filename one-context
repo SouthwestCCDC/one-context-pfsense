@@ -165,7 +165,10 @@ if ($config["system"]["user"][0]["name"] == "admin") {
 
 if ($apply_required && !$dry_run) {
   write_config();
-  echo "Reboot required.\n";
-  system_reboot_sync();
+  echo "Config reload required.\n";
+  // system_reboot_sync();
+  reload_all_sync();
+  sleep(2);
+  filter_configure_sync();
 }
 ?>
