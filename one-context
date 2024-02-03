@@ -108,12 +108,6 @@ $zones = array(
   "WAN" => "ETH0",
   "LAN" => "ETH1");
 
-# This script should be in the "earlyshellcmd" config, so it runs at
-#  boot.
-check_and_apply_if_different(
-  $config["system"]["earlyshellcmd"],
-  "/usr/local/sbin/one-context");
-
 # The WAN's DNS server should be this instance's primary DNS server.
 check_and_apply_if_different(
   $config["system"]["dnsserver"]["0"],
